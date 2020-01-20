@@ -80,6 +80,7 @@ public class OrdenControlador {
 			}
 			
 			
+			
 			productoDTO = productoClient.obtenerProducto(detalle.getIdProducto());
 			detalle.setPrecio(productoDTO.getPrecio());
 //			DetalleOrden detalleOrden = new DetalleOrden();
@@ -89,8 +90,8 @@ public class OrdenControlador {
 			totalOrden+= detalle.getCantidad().doubleValue() * productoDTO.getPrecio().doubleValue();
 //			detalleOrden.setOrden(or);
 //			or.addDetalle(detalleOrden);
-			//detalle.setOrden(or);
-			
+			//detalle.setOrden(or);		
+			stockClient.actualizarStock(detalle.getIdProducto(),detalle.getCantidad().doubleValue());
 		}
 		or.setFechaEnvio(orden.getFechaEnvio());
 		or.setIdCliente(orden.getIdCliente());

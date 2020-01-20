@@ -23,10 +23,11 @@ public class StockServiceImpl implements StockService{
 	@Autowired
 	private StockRepository stockRepository;
 
+	@Transactional(readOnly = false)
 	@Override
 	public Stock guardarStock(Stock Stock) {
 		// TODO Auto-generated method stub
-		return null;
+		return stockRepository.save(Stock);
 	}
 
 	@Override

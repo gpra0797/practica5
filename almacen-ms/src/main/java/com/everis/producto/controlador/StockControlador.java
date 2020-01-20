@@ -1,6 +1,7 @@
 package com.everis.producto.controlador;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everis.producto.dto.CantidadDTO;
@@ -118,5 +120,54 @@ public class StockControlador {
 		cantidadDTO.setCantidad(doubleTotal);
 		
 		return cantidadDTO;
+	}
+	
+	
+	
+	/**********************ACTUALIZAR STOCK*************************************/
+	@PostMapping(value = "/stock/actualizar/{idProducto}/cantidad/{cantidad}")
+	public void actualizarStock(
+			@PathVariable("idProducto") Long idProducto,
+			@PathVariable("cantidad") Double cantidad
+			) throws ValidationException, ResourceNotFoundException {
+	
+		List<Stock> lstStock = StreamSupport.stream(StockService.obtenerCantidadesXProducto(idProducto)
+									.spliterator(), false)
+									.collect(Collectors.toList());
+		if(lstStock.size()==0) {
+			throw new ValidationException("No se encontró este producto en ninguna tienda");
+		}
+	
+		Double cantidadActualIndice = 0.0;
+		Double cantidadOrdenada=cantidad;
+		Double cantidadRestante=0.0;
+		int i=0;
+		for(Stock stock : lstStock) {
+			cantidadActualIndice = lstStock.get(i).getCantidad().doubleValue();
+			if(cantidadActualIndice>=cantidadOrdenada) {
+				stock.setCantidad(new BigDecimal(stock.getCantidad().doubleValue()-cantidadOrdenada));
+			
+			
+			}else {
+				stock.setCantidad(new BigDecimal(cantidadOrdenada-stock.getCantidad().doubleValue()));
+			
+				
+			}
+			cantidadRestante=cantidadOrdenada-stock.getCantidad().doubleValue();
+			
+			
+			StockService.guardarStock(stock);
+			if(cantidadRestante<=0) {
+				break;
+			}
+			i++;
+			
+			
+		}
+		
+		
+		
+		
+		
 	}
 }

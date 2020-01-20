@@ -17,7 +17,7 @@ public class DetalleOrdenDTO {
 	
 	private Long idProducto;
 
-	private Orden orden;
+//	private Orden orden;
 	
 	
 	private BigDecimal cantidad;

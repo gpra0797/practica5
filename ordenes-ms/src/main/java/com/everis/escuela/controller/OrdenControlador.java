@@ -2,7 +2,6 @@ package com.everis.escuela.controller;
 
 import java.math.BigDecimal;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -10,6 +9,7 @@ import java.util.stream.StreamSupport;
 import javax.validation.Valid;
 
 import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -23,16 +23,17 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.everis.escuela.dto.CantidadDTO;
 import com.everis.escuela.dto.OrdenDTO;
 import com.everis.escuela.dto.OrdenReducidaDTO;
+import com.everis.escuela.dto.ProductoDTO;
 import com.everis.escuela.entidad.DetalleOrden;
 import com.everis.escuela.entidad.Orden;
 import com.everis.escuela.exceptions.ResourceNotFoundException;
 import com.everis.escuela.exceptions.ValidationException;
+import com.everis.escuela.repository.feign.ProductoClient;
+import com.everis.escuela.repository.feign.StockClient;
 import com.everis.escuela.service.impl.OrdenServiceImpl;
-import com.everis.escuela.dto.ProductoDTO;
-import com.everis.escuela.dto.CantidadDTO;
-import com.everis.escuela.dto.DetalleOrdenDTO;
 
 @RestController
 public class OrdenControlador {
@@ -40,10 +41,14 @@ public class OrdenControlador {
 	@Autowired
 	private OrdenServiceImpl OrdenService;
 	
-
 	@Autowired
 	private DiscoveryClient client;
+	
+	@Autowired
+	private ProductoClient productoClient;
 
+	@Autowired
+	private StockClient stockClient;
 	
 	@RequestMapping("/Ordens")
 	public List<OrdenDTO> obtenerOrdens() {
@@ -55,40 +60,42 @@ public class OrdenControlador {
 	@ResponseStatus(HttpStatus.CREATED)
 	@RequestMapping(value="/Ordens", method = RequestMethod.POST)	
 	public OrdenDTO saveOrden(
-		@Valid	@RequestBody OrdenReducidaDTO orden) throws ValidationException {		
+		@Valid	@RequestBody OrdenReducidaDTO orden) throws ValidationException, ResourceNotFoundException {		
 		ModelMapper modelMapper = new ModelMapper();
-		Orden or = new Orden();
+		
 		ProductoDTO productoDTO;
 		CantidadDTO cantidadDTO;
 		Double totalOrden=0.0;
 		
-		
-		or.setFechaEnvio(orden.getFechaEnvio());
-		or.setIdCliente(orden.getIdCliente());
-		
+		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+		Orden or = modelMapper.map(orden, Orden.class);
 		
 		
-		for(DetalleOrdenDTO detalle : orden.getDetalleOrden()) {
-			cantidadDTO = new CantidadDTO();
-			cantidadDTO.setCantidad(getCantidad("almacen-ms",detalle.getIdProducto()).getCantidad());
 		
+		for(DetalleOrden detalle : or.getDetalleOrden()) {
+			cantidadDTO =stockClient.obtenerCantidadXProducto(detalle.getIdProducto());
+				
 			if(detalle.getCantidad().doubleValue()>cantidadDTO.getCantidad().doubleValue()) {
 				throw new ValidationException("La cantidad ingresada es mayor a la disponible");
 			}
 			
 			
-			productoDTO = getProductoDTO("producto-ms",detalle.getIdProducto());
-			List<DetalleOrden> lstDetalle = new ArrayList<>();
-			DetalleOrden detalleOrden = new DetalleOrden();
-			detalleOrden.setCantidad(cantidadDTO.getCantidad());
-			detalleOrden.setIdProducto(productoDTO.getId());
-			detalleOrden.setPrecio(productoDTO.getPrecio());
-			totalOrden+= detalleOrden.getCantidad().doubleValue() * detalleOrden.getPrecio().doubleValue();
-		
-			or.addDetalle(detalleOrden);
+			productoDTO = productoClient.obtenerProducto(detalle.getIdProducto());
+			detalle.setPrecio(productoDTO.getPrecio());
+//			DetalleOrden detalleOrden = new DetalleOrden();
+//			detalleOrden.setCantidad(cantidadDTO.getCantidad());
+//			detalleOrden.setIdProducto(productoDTO.getId());
+//			detalleOrden.setPrecio(productoDTO.getPrecio());
+			totalOrden+= detalle.getCantidad().doubleValue() * productoDTO.getPrecio().doubleValue();
+//			detalleOrden.setOrden(or);
+//			or.addDetalle(detalleOrden);
+			//detalle.setOrden(or);
 			
 		}
+		or.setFechaEnvio(orden.getFechaEnvio());
+		or.setIdCliente(orden.getIdCliente());
 		or.setTotal(new BigDecimal(totalOrden));
+		
 		
 		 return  modelMapper.map(OrdenService.guardarOrden(or), OrdenDTO.class);
 	}

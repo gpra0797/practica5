@@ -50,7 +50,7 @@ public class Orden {
 	private BigDecimal total;
 	
 	
-	@OneToMany(mappedBy = "orden", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
+	@OneToMany(cascade = CascadeType.ALL)
 	private List<DetalleOrden> detalleOrden=new ArrayList<>();
 	
 	

@@ -21,7 +21,7 @@ public class OrdenDTO {
 	private Date fecha;
 	
 	
-	private Date fechaOrden;
+	private Date fechaEnvio;
 	
 	private BigDecimal total;
 	

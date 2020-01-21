@@ -7,13 +7,3 @@ eureka:
   instance:
     instanceId: ${spring.cloud.client.hostname}:${spring.application.name}:${spring.application.instance_id:${random.value}}
        
-hystrix:
-  command:
-    RemoteMessageClientCommand:
-      execution:
-        isolation:
-          thread:
-            timeoutInMilliseconds: 20000      
-ribbon:
-  ConnectTimeout: 10000
-  ReadTimeout: 10000

@@ -7,3 +7,14 @@ spring:
   jpa:    hibernate:      ddl-auto: update
     show-sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+hystrix:
+  command:
+    RemoteMessageClientCommand:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 20000
+ribbon:
+  ConnectTimeout: 10000
+  ReadTimeout: 10000

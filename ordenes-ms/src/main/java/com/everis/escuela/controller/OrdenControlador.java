@@ -36,126 +36,147 @@ import com.everis.escuela.exceptions.ResourceNotFoundException;
 import com.everis.escuela.exceptions.ValidationException;
 import com.everis.escuela.repository.feign.ProductoClient;
 import com.everis.escuela.repository.feign.StockClient;
+import com.everis.escuela.service.impl.FeignServiceImpl;
 import com.everis.escuela.service.impl.OrdenServiceImpl;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 
 @RestController
 public class OrdenControlador {
-	
+
 	@Autowired
 	private OrdenServiceImpl OrdenService;
-	
+
 	@Autowired
 	private DiscoveryClient client;
-	
+
 	@Autowired
 	private ProductoClient productoClient;
 
-	@Autowired
-	private StockClient stockClient;
+//	@Autowired
+//	private FeignServiceImpl stockClient;
 	
+	@Autowired
+	private StockClient stockClientI;
+
 	@RequestMapping("/Ordens")
 	public List<OrdenDTO> obtenerOrdens() {
 		ModelMapper modelMapper = new ModelMapper();
 		return StreamSupport.stream(OrdenService.obtenerOrdens().spliterator(), false)
 				.map(c -> modelMapper.map(c, OrdenDTO.class)).collect(Collectors.toList());
 	}
-	
-//	@HystrixCommand(fallbackMethod = "metodoException")
+
+	@HystrixCommand(fallbackMethod = "metodoException",
+			commandKey = "saveOrden",
+			groupKey = "saveOrden", threadPoolKey = "saveOrden",commandProperties = {
+				@HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "5000"),
+				@HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "5")
+			})
 	@ResponseStatus(HttpStatus.CREATED)
-	@RequestMapping(value="/Ordens", method = RequestMethod.POST)	
-	public OrdenDTO saveOrden(
-		@Valid	@RequestBody OrdenReducidaDTO orden) throws ValidationException, ResourceNotFoundException {		
+	@RequestMapping(value = "/Ordens", method = RequestMethod.POST)
+	public OrdenDTO saveOrden(@Valid @RequestBody OrdenReducidaDTO orden)
+			throws ValidationException, ResourceNotFoundException {
 		ModelMapper modelMapper = new ModelMapper();
-		
+
 		ProductoDTO productoDTO;
 		CantidadDTO cantidadDTO;
-		Double totalOrden=0.0;
-		
+		Double totalOrden = 0.0;
+
 		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 		Orden or = modelMapper.map(orden, Orden.class);
+
+		for (DetalleOrden detalle : or.getDetalleOrden()) {
+			
+			
+			cantidadDTO = stockClientI.obtenerCantidadXProducto(detalle.getIdProducto());
 		
-		
-		
-		for(DetalleOrden detalle : or.getDetalleOrden()) {
-			cantidadDTO =stockClient.obtenerCantidadXProducto(detalle.getIdProducto());
-				
-			if(detalle.getCantidad().doubleValue()>cantidadDTO.getCantidad().doubleValue()) {
+			
+
+			if (detalle.getCantidad().doubleValue() > cantidadDTO.getCantidad().doubleValue()) {
 				throw new ValidationException("La cantidad ingresada es mayor a la disponible");
 			}
-			
-			
-			
+
 			productoDTO = productoClient.obtenerProducto(detalle.getIdProducto());
 			detalle.setPrecio(productoDTO.getPrecio());
-//			DetalleOrden detalleOrden = new DetalleOrden();
-//			detalleOrden.setCantidad(cantidadDTO.getCantidad());
-//			detalleOrden.setIdProducto(productoDTO.getId());
-//			detalleOrden.setPrecio(productoDTO.getPrecio());
-			totalOrden+= detalle.getCantidad().doubleValue() * productoDTO.getPrecio().doubleValue();
-//			detalleOrden.setOrden(or);
-//			or.addDetalle(detalleOrden);
-			//detalle.setOrden(or);		
-//			stockClient.actualizarStock(detalle.getIdProducto(),detalle.getCantidad().doubleValue());
+
+			totalOrden += detalle.getCantidad().doubleValue() * productoDTO.getPrecio().doubleValue();
+		
 		}
 		or.setFechaEnvio(orden.getFechaEnvio());
 		or.setIdCliente(orden.getIdCliente());
-		or.setTotal(new BigDecimal(totalOrden));		
+		or.setTotal(new BigDecimal(totalOrden));
 		Orden ordenGuardada = OrdenService.guardarOrden(or);
-		
+
 		ActualizarStockDTO actualizarStockDTO = new ActualizarStockDTO();
 		actualizarStockDTO.setDetalles(new ArrayList<DetalleOrdenReducidaDTO>());
-		for(DetalleOrden detalle : or.getDetalleOrden()) {
-			DetalleOrdenReducidaDTO detalleOrdenReducidaDTO = new DetalleOrdenReducidaDTO(detalle.getIdProducto(),detalle.getCantidad());
-			
+		for (DetalleOrden detalle : or.getDetalleOrden()) {
+			DetalleOrdenReducidaDTO detalleOrdenReducidaDTO = new DetalleOrdenReducidaDTO(detalle.getIdProducto(),
+					detalle.getCantidad());
+
 			actualizarStockDTO.getDetalles().add(detalleOrdenReducidaDTO);
 		}
-		
-		stockClient.actualizarStockskLista(actualizarStockDTO);
-		
-		
-		
-		 return  modelMapper.map(ordenGuardada, OrdenDTO.class);
+
+		stockClientI.actualizarStockskLista(actualizarStockDTO);
+
+		return modelMapper.map(ordenGuardada, OrdenDTO.class);
 	}
-	
+
 	@GetMapping("/Ordens/{id}")
-	public Orden findById(@PathVariable Long id) throws ResourceNotFoundException{		
+	public Orden findById(@PathVariable Long id) throws ResourceNotFoundException {
 		return OrdenService.obtenerOrdenXId(id);
-	
+
 	}
-	
-	public CantidadDTO getCantidad(String service,
-			Long id) {
+
+	public CantidadDTO getCantidad(String service, Long id) {
 		List<ServiceInstance> list = client.getInstances(service);
-		if(list != null && list.size() >0) {
-			int rand = (int)Math.round(Math.random()*10) % list.size() ;
+		if (list != null && list.size() > 0) {
+			int rand = (int) Math.round(Math.random() * 10) % list.size();
 			URI uri = list.get(rand).getUri();
-			if(uri != null) {
-				return (new RestTemplate()).getForObject(uri.toString()+"/cantidad/acumulado/producto/{idProducto}", CantidadDTO.class,id);
-			}
-		}
-		return null;
-	}
-	
-	public ProductoDTO getProductoDTO(String service,
-			Long id) {
-		List<ServiceInstance> list = client.getInstances(service);
-		if(list != null && list.size() >0) {
-			int rand = (int)Math.round(Math.random()*10) % list.size() ;
-			URI uri = list.get(rand).getUri();
-			if(uri != null) {
-				return (new RestTemplate()).getForObject(uri.toString()+"/productos/{id}", ProductoDTO.class,id);
+			if (uri != null) {
+				return (new RestTemplate()).getForObject(uri.toString() + "/cantidad/acumulado/producto/{idProducto}",
+						CantidadDTO.class, id);
 			}
 		}
 		return null;
 	}
 
-	public OrdenDTO metodoException(
-			@Valid	@RequestBody OrdenReducidaDTO orden) throws ValidationException, ResourceNotFoundException {	
-		ModelMapper modelMapper = new ModelMapper();
-		return modelMapper.map(orden, OrdenDTO.class);
+	public ProductoDTO getProductoDTO(String service, Long id) {
+		List<ServiceInstance> list = client.getInstances(service);
+		if (list != null && list.size() > 0) {
+			int rand = (int) Math.round(Math.random() * 10) % list.size();
+			URI uri = list.get(rand).getUri();
+			if (uri != null) {
+				return (new RestTemplate()).getForObject(uri.toString() + "/productos/{id}", ProductoDTO.class, id);
+			}
+		}
+		return null;
 	}
-	
-	
+
+	public OrdenDTO metodoException(@Valid @RequestBody OrdenReducidaDTO orden)
+			throws ValidationException, ResourceNotFoundException {
+		ModelMapper modelMapper = new ModelMapper();
+
+		ProductoDTO productoDTO;
+		CantidadDTO cantidadDTO;
+		Double totalOrden = 0.0;
+
+		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+		Orden or = modelMapper.map(orden, Orden.class);
+
+		for (DetalleOrden detalle : or.getDetalleOrden()) {
+			cantidadDTO =new CantidadDTO(new BigDecimal(0));
+
+			productoDTO = productoClient.obtenerProducto(detalle.getIdProducto());
+			detalle.setPrecio(productoDTO.getPrecio());
+			totalOrden += detalle.getCantidad().doubleValue() * productoDTO.getPrecio().doubleValue();
+
+		}
+		or.setFechaEnvio(orden.getFechaEnvio());
+		or.setIdCliente(orden.getIdCliente());
+		or.setTotal(new BigDecimal(totalOrden));
+		Orden ordenGuardada = OrdenService.guardarOrden(or);
+
+		return modelMapper.map(ordenGuardada, OrdenDTO.class);
+	}
 
 }

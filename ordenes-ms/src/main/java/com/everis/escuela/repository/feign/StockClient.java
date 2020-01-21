@@ -11,11 +11,13 @@ import com.everis.escuela.dto.ActualizarStockDTO;
 import com.everis.escuela.dto.CantidadDTO;
 import com.everis.escuela.exceptions.ResourceNotFoundException;
 import com.everis.escuela.exceptions.ValidationException;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 
 @FeignClient("almacen-ms" )
 public interface StockClient {
-
+	
+	
 	@GetMapping(value = "/cantidad/acumulado/producto/{idProducto}")
 	public CantidadDTO obtenerCantidadXProducto(
 			@PathVariable("idProducto") Long idProducto
@@ -26,4 +28,6 @@ public interface StockClient {
 	public void actualizarStockskLista(
 			@RequestBody ActualizarStockDTO actualizarDTO
 			) throws ValidationException, ResourceNotFoundException;
+	
+	
 }

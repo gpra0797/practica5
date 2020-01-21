@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: gateway-ms
+
+zuul:
+  routes:
+    producto-ms:
+      path: /productos/**
+      service-id: producto-ms
+    almacen-ms:
+      path: /almacen/**
+      service-id: almacen-ms
+    orden-ms:
+      path: /orden/**
+      service-id: orden-ms
+      
+server:
+      port: 2202
+            
+eureka:
+  instance:
+    instanceId: ${spring.cloud.client.hostname}:${spring.application.name}:${spring.application.instance_id:${random.value}}      

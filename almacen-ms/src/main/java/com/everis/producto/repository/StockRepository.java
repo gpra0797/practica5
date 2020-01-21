@@ -14,7 +14,7 @@ import com.everis.producto.entity.Stock;
 public interface StockRepository extends CrudRepository<Stock, Long>{
 	
 	
-	@Query("select  stock from Stock stock where stock.idProducto = ?1 and stock.idTienda = ?2")
+	@Query("select  stock from Stock stock where stock.idProducto = ?1 and stock.idTienda = ?2 and stock.cantidad > 0 ")
 	public List<Stock> obtenerCantidadDeProductoEnTienda(Long idProducto,Long idTienda);
 	
 	@Query("select stock from Stock stock where stock.idProducto = ?1")

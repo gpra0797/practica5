@@ -139,29 +139,29 @@ public class StockControlador {
 		}
 	
 		Double cantidadActualIndice = 0.0;
-		Double cantidadOrdenada=cantidad;
-		Double cantidadRestante=0.0;
-		int i=0;
+//		Double cantidadOrdenada=cantidad;
+		Double cantidadRestante=cantidad;
+		
 		for(Stock stock : lstStock) {
-			cantidadActualIndice = lstStock.get(i).getCantidad().doubleValue();
-			if(cantidadActualIndice>=cantidadOrdenada) {
-				stock.setCantidad(new BigDecimal(stock.getCantidad().doubleValue()-cantidadOrdenada));
-			
+			cantidadActualIndice =stock.getCantidad().doubleValue();
+			if(cantidadActualIndice>=cantidadRestante) {
+				stock.setCantidad(new BigDecimal(stock.getCantidad().doubleValue()-cantidadRestante));
+
+				cantidadRestante=0.0;
 			
 			}else {
-				stock.setCantidad(new BigDecimal(cantidadOrdenada-stock.getCantidad().doubleValue()));
+				stock.setCantidad(new BigDecimal(cantidadActualIndice-stock.getCantidad().doubleValue()));
 			
+				cantidadRestante=cantidadRestante-cantidadActualIndice;
 				
 			}
-			cantidadRestante=cantidadOrdenada-stock.getCantidad().doubleValue();
 			
 			
 			StockService.guardarStock(stock);
-			if(cantidadRestante<=0) {
+			if(cantidadRestante<=0.0) {
 				break;
 			}
-			i++;
-			
+	
 			
 		}
 		

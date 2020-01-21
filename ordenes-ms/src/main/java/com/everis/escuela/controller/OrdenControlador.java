@@ -34,6 +34,7 @@ import com.everis.escuela.exceptions.ValidationException;
 import com.everis.escuela.repository.feign.ProductoClient;
 import com.everis.escuela.repository.feign.StockClient;
 import com.everis.escuela.service.impl.OrdenServiceImpl;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 @RestController
 public class OrdenControlador {
@@ -57,6 +58,7 @@ public class OrdenControlador {
 				.map(c -> modelMapper.map(c, OrdenDTO.class)).collect(Collectors.toList());
 	}
 	
+	@HystrixCommand(fallbackMethod = "metodoException")
 	@ResponseStatus(HttpStatus.CREATED)
 	@RequestMapping(value="/Ordens", method = RequestMethod.POST)	
 	public OrdenDTO saveOrden(
@@ -132,7 +134,12 @@ public class OrdenControlador {
 		}
 		return null;
 	}
-	
+
+	public OrdenDTO metodoException(
+			@Valid	@RequestBody OrdenReducidaDTO orden) throws ValidationException, ResourceNotFoundException {	
+		ModelMapper modelMapper = new ModelMapper();
+		return modelMapper.map(orden, OrdenDTO.class);
+	}
 	
 	
 

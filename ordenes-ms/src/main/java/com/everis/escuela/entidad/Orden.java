@@ -51,7 +51,7 @@ public class Orden {
 	
 	
 	@OneToMany(cascade = CascadeType.ALL)
-	private List<DetalleOrden> detalleOrden=new ArrayList<>();
+	private List<DetalleOrden> detalleOrden;
 	
 	
 	public void addDetalle(DetalleOrden detalleOrden) {

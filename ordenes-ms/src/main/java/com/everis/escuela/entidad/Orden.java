@@ -28,7 +28,6 @@ import lombok.Setter;
 @AllArgsConstructor//Define un constructor con todos los parámetros
 @NoArgsConstructor
 @Entity
-@Table(name="orden")
 public class Orden {
 		
 	@Id
@@ -50,13 +49,9 @@ public class Orden {
 	private BigDecimal total;
 	
 	
-	@OneToMany(cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "orden",cascade = CascadeType.ALL)
 	private List<DetalleOrden> detalleOrden;
 	
-	
-	public void addDetalle(DetalleOrden detalleOrden) {
-		this.detalleOrden.add(detalleOrden);
-	}
 	
 	
 	@PrePersist

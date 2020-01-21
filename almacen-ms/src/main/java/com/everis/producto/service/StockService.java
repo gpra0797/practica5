@@ -3,6 +3,8 @@ package com.everis.producto.service;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.everis.producto.dto.ActualizarStockDTO;
+import com.everis.producto.dto.CantidadDTO;
 import com.everis.producto.entity.Stock;
 import com.everis.producto.exceptions.ResourceNotFoundException;
 
@@ -22,4 +24,8 @@ public interface StockService {
 	BigDecimal getCantidadXProducto(Long idProducto) throws ResourceNotFoundException;
 	
 	BigDecimal getCantidadXProductoAndTienda(Long idProducto,Long idTienda) throws ResourceNotFoundException;
+	
+	void actualizarStockByIdProducto(Long idProducto,Double cantidad);
+	
+	void actualizarStockLista(List<Stock> lstStock);
 }

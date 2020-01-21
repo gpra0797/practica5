@@ -2,6 +2,7 @@ package com.everis.producto.dto;
 
 import java.math.BigDecimal;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,8 +12,12 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CantidadDTO {
+public class DetalleOrdenReducidaDTO {	
+	
+	private Long idProducto;
 
+	
 	private BigDecimal cantidad;
 	
+
 }

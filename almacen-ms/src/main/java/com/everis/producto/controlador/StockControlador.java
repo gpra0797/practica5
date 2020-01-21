@@ -12,9 +12,13 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everis.producto.dto.ActualizarStockDTO;
 import com.everis.producto.dto.CantidadDTO;
+import com.everis.producto.dto.DetalleOrdenReducidaDTO;
 import com.everis.producto.dto.StockDTO;
 import com.everis.producto.entity.Stock;
 import com.everis.producto.exceptions.ResourceNotFoundException;
@@ -125,10 +129,10 @@ public class StockControlador {
 	
 	
 	/**********************ACTUALIZAR STOCK*************************************/
-	@PostMapping(value = "/stock/actualizar/{idProducto}/cantidad/{cantidad}")
+
 	public void actualizarStock(
-			@PathVariable("idProducto") Long idProducto,
-			@PathVariable("cantidad") Double cantidad
+			Long idProducto,
+			Double cantidad
 			) throws ValidationException, ResourceNotFoundException {
 	
 		List<Stock> lstStock = StreamSupport.stream(StockService.obtenerCantidadesXProducto(idProducto)
@@ -137,9 +141,8 @@ public class StockControlador {
 		if(lstStock.size()==0) {
 			throw new ValidationException("No se encontró este producto en ninguna tienda");
 		}
-	
+		
 		Double cantidadActualIndice = 0.0;
-//		Double cantidadOrdenada=cantidad;
 		Double cantidadRestante=cantidad;
 		
 		for(Stock stock : lstStock) {
@@ -157,17 +160,20 @@ public class StockControlador {
 			}
 			
 			
-			StockService.guardarStock(stock);
+		
 			if(cantidadRestante<=0.0) {
 				break;
 			}
 	
 			
 		}
-		
-		
-		
-		
-		
+		StockService.actualizarStockLista(lstStock);
+	}
+	
+	@PostMapping(value = "/actualizar/cantidad/")
+	public void actualizarStockskLista(@RequestBody ActualizarStockDTO actualizarStockDTO) throws ValidationException, ResourceNotFoundException {
+		for(DetalleOrdenReducidaDTO detalleDTO : actualizarStockDTO.getDetalles()){
+			actualizarStock(detalleDTO.getIdProducto(),detalleDTO.getCantidad().doubleValue());
+		}
 	}
 }

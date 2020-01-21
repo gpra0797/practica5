@@ -2,6 +2,7 @@ package com.everis.escuela.controller;
 
 import java.math.BigDecimal;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -23,7 +24,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.everis.escuela.dto.ActualizarStockDTO;
 import com.everis.escuela.dto.CantidadDTO;
+import com.everis.escuela.dto.DetalleOrdenReducidaDTO;
 import com.everis.escuela.dto.OrdenDTO;
 import com.everis.escuela.dto.OrdenReducidaDTO;
 import com.everis.escuela.dto.ProductoDTO;
@@ -58,7 +61,7 @@ public class OrdenControlador {
 				.map(c -> modelMapper.map(c, OrdenDTO.class)).collect(Collectors.toList());
 	}
 	
-	@HystrixCommand(fallbackMethod = "metodoException")
+//	@HystrixCommand(fallbackMethod = "metodoException")
 	@ResponseStatus(HttpStatus.CREATED)
 	@RequestMapping(value="/Ordens", method = RequestMethod.POST)	
 	public OrdenDTO saveOrden(
@@ -93,14 +96,26 @@ public class OrdenControlador {
 //			detalleOrden.setOrden(or);
 //			or.addDetalle(detalleOrden);
 			//detalle.setOrden(or);		
-			stockClient.actualizarStock(detalle.getIdProducto(),detalle.getCantidad().doubleValue());
+//			stockClient.actualizarStock(detalle.getIdProducto(),detalle.getCantidad().doubleValue());
 		}
 		or.setFechaEnvio(orden.getFechaEnvio());
 		or.setIdCliente(orden.getIdCliente());
-		or.setTotal(new BigDecimal(totalOrden));
+		or.setTotal(new BigDecimal(totalOrden));		
+		Orden ordenGuardada = OrdenService.guardarOrden(or);
+		
+		ActualizarStockDTO actualizarStockDTO = new ActualizarStockDTO();
+		actualizarStockDTO.setDetalles(new ArrayList<DetalleOrdenReducidaDTO>());
+		for(DetalleOrden detalle : or.getDetalleOrden()) {
+			DetalleOrdenReducidaDTO detalleOrdenReducidaDTO = new DetalleOrdenReducidaDTO(detalle.getIdProducto(),detalle.getCantidad());
+			
+			actualizarStockDTO.getDetalles().add(detalleOrdenReducidaDTO);
+		}
+		
+		stockClient.actualizarStockskLista(actualizarStockDTO);
 		
 		
-		 return  modelMapper.map(OrdenService.guardarOrden(or), OrdenDTO.class);
+		
+		 return  modelMapper.map(ordenGuardada, OrdenDTO.class);
 	}
 	
 	@GetMapping("/Ordens/{id}")

@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -20,7 +21,6 @@ import lombok.Setter;
 @AllArgsConstructor//Define un constructor con todos los parámetros
 @NoArgsConstructor
 @Entity
-@Table(name="detalle_orden")
 public class DetalleOrden {
 		
 	@Id
@@ -31,6 +31,7 @@ public class DetalleOrden {
 	private Long idProducto;
 
 	@ManyToOne
+	@JoinColumn(name = "orden_id")
 	private Orden orden;
 	
 	@Column(name = "cantidad")

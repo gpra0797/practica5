@@ -4,7 +4,10 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import com.everis.escuela.dto.ActualizarStockDTO;
 import com.everis.escuela.dto.CantidadDTO;
 import com.everis.escuela.exceptions.ResourceNotFoundException;
 import com.everis.escuela.exceptions.ValidationException;
@@ -19,9 +22,8 @@ public interface StockClient {
 			) throws ValidationException, ResourceNotFoundException;
 	
 	
-	@PostMapping(value = "/stock/actualizar/{idProducto}/cantidad/{cantidad}")
-	public void actualizarStock(
-			@PathVariable("idProducto") Long idProducto,
-			@PathVariable("cantidad") Double cantidad
+	@PostMapping(value = "/actualizar/cantidad/")
+	public void actualizarStockskLista(
+			@RequestBody ActualizarStockDTO actualizarDTO
 			) throws ValidationException, ResourceNotFoundException;
 }

@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.everis.producto.dto.ActualizarStockDTO;
+import com.everis.producto.dto.CantidadDTO;
 import com.everis.producto.entity.Stock;
 import com.everis.producto.exceptions.ResourceNotFoundException;
 import com.everis.producto.repository.StockRepository;
@@ -68,4 +70,17 @@ public class StockServiceImpl implements StockService{
 				.orElseThrow(()-> new ResourceNotFoundException("no se encontró el producto en esta tienda "));
 	}
 
+	@Override
+	public void actualizarStockByIdProducto(Long idProducto,Double cantidad) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	@Transactional(readOnly = false)
+	public void actualizarStockLista(List<Stock> lstStock) {
+		
+		stockRepository.saveAll(lstStock);
+	}
+	
 }

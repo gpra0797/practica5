@@ -1,22 +1,22 @@
-spring:
-  application:
-    name: gateway-ms
-
+server:
+      port: 9090
+      
 zuul:
+  ignored-headers: Access-Control-Allow-Credentials, Access-Control-Allow-Origin
   routes:
-    producto-ms:
-      path: /productos/**
+    producto:
+      path: /items/**
       service-id: producto-ms
-    almacen-ms:
+    almacen:
       path: /almacen/**
       service-id: almacen-ms
-    orden-ms:
-      path: /orden/**
-      service-id: orden-ms
-      
-server:
-      port: 2202
-            
+    ordenes:
+      path: /ordenes/**
+      service-id: ordenes-ms
+    compania:
+      path: /compania/**
+      service-id: compania-ns
+                  
 eureka:
   instance:
     instanceId: ${spring.cloud.client.hostname}:${spring.application.name}:${spring.application.instance_id:${random.value}}      

@@ -26,6 +26,8 @@ import com.everis.producto.entity.Producto;
 import com.everis.producto.entity.TipoProducto;
 import com.everis.producto.exceptions.ResourceNotFoundException;
 import com.everis.producto.exceptions.ValidationException;
+import com.everis.producto.repository.feign.StockClient;
+import com.everis.producto.service.impl.FeignClientServiceImpl;
 import com.everis.producto.service.impl.ProductoServiceImpl;
 
 @RestController
@@ -43,6 +45,8 @@ public class ProductoControlador {
 	@Autowired
 	private DiscoveryClient client;
 	
+	@Autowired
+	private FeignClientServiceImpl stockClient;
 	
 	@GetMapping(value = "/productos")
 	public List<ProductoDTO> obtenerProductos() {
@@ -56,11 +60,12 @@ public class ProductoControlador {
 	@GetMapping(value = "/productos/{id}")
 	public ProductoDTO obtenerProducto(
 			@PathVariable("id") Long id
-			) throws ResourceNotFoundException{
+			) throws ResourceNotFoundException, ValidationException{
 		
 		ModelMapper mapper = new ModelMapper();
 		ProductoDTO producto =  mapper.map(productoService.obtenerProductoXId(id), ProductoDTO.class);
-		//producto.setCantidadStock(getCantidad("almacen-ms",id).getCantidad());
+//		producto.setCantidadStock(getCantidad("almacen-ms",id).getCantidad());
+		producto.setCantidadStock(stockClient.obtenerCantidadStockProducto(id).getCantidad());
 		return producto;
 	}
 	

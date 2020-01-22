@@ -36,10 +36,13 @@ import com.everis.escuela.exceptions.ResourceNotFoundException;
 import com.everis.escuela.exceptions.ValidationException;
 import com.everis.escuela.repository.feign.ProductoClient;
 import com.everis.escuela.repository.feign.StockClient;
-import com.everis.escuela.service.impl.FeignServiceImpl;
 import com.everis.escuela.service.impl.OrdenServiceImpl;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
+
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @RestController
 public class OrdenControlador {
@@ -55,23 +58,26 @@ public class OrdenControlador {
 
 //	@Autowired
 //	private FeignServiceImpl stockClient;
-	
+
 	@Autowired
 	private StockClient stockClientI;
 
-	@RequestMapping("/Ordens")
+	@RequestMapping("/Ordenes")
 	public List<OrdenDTO> obtenerOrdens() {
 		ModelMapper modelMapper = new ModelMapper();
 		return StreamSupport.stream(OrdenService.obtenerOrdens().spliterator(), false)
 				.map(c -> modelMapper.map(c, OrdenDTO.class)).collect(Collectors.toList());
 	}
 
-	@HystrixCommand(fallbackMethod = "metodoException",
-			commandKey = "saveOrden",
-			groupKey = "saveOrden", threadPoolKey = "saveOrden",commandProperties = {
-				@HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "5000"),
-				@HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "5")
-			})
+	@HystrixCommand(fallbackMethod = "metodoException", commandKey = "saveOrden", groupKey = "saveOrden", threadPoolKey = "saveOrden", commandProperties = {
+			@HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "5000"),
+			@HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "5") })
+	@ApiOperation(value = "Guardar una orden de venta", notes = "Al guardar una orden se verificará el stock en los almacenes de cada producto", response = OrdenDTO.class)
+	@ApiResponses(value = {
+			@ApiResponse(code = 201, message = "Se registró correctamente la orden", response = OrdenDTO.class),
+			@ApiResponse(code = 404, message = "Recurso no encontrado", response = ResourceNotFoundException.class),
+			@ApiResponse(code = 400, message = "Error de validación", response = ResourceNotFoundException.class),
+			@ApiResponse(code = 200, message = "Validación de negocio", response = ValidationException.class), })
 	@ResponseStatus(HttpStatus.CREATED)
 	@RequestMapping(value = "/Ordens", method = RequestMethod.POST)
 	public OrdenDTO saveOrden(@Valid @RequestBody OrdenReducidaDTO orden)
@@ -86,11 +92,8 @@ public class OrdenControlador {
 		Orden or = modelMapper.map(orden, Orden.class);
 
 		for (DetalleOrden detalle : or.getDetalleOrden()) {
-			
-			
+
 			cantidadDTO = stockClientI.obtenerCantidadXProducto(detalle.getIdProducto());
-		
-			
 
 			if (detalle.getCantidad().doubleValue() > cantidadDTO.getCantidad().doubleValue()) {
 				throw new ValidationException("La cantidad ingresada es mayor a la disponible");
@@ -100,7 +103,7 @@ public class OrdenControlador {
 			detalle.setPrecio(productoDTO.getPrecio());
 
 			totalOrden += detalle.getCantidad().doubleValue() * productoDTO.getPrecio().doubleValue();
-		
+
 		}
 		or.setFechaEnvio(orden.getFechaEnvio());
 		or.setIdCliente(orden.getIdCliente());
@@ -164,7 +167,7 @@ public class OrdenControlador {
 		Orden or = modelMapper.map(orden, Orden.class);
 
 		for (DetalleOrden detalle : or.getDetalleOrden()) {
-			cantidadDTO =new CantidadDTO(new BigDecimal(0));
+			cantidadDTO = new CantidadDTO(new BigDecimal(0));
 
 			productoDTO = productoClient.obtenerProducto(detalle.getIdProducto());
 			detalle.setPrecio(productoDTO.getPrecio());

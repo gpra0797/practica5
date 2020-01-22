@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.validation.constraints.FutureOrPresent;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,22 +15,15 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class OrdenReducidaDTO {
-		
-
+	@ApiModelProperty
 	private Long idCliente;
-	
-	
 
 	private Date fecha;
-	
-	
+
 	@FutureOrPresent
 	private Date fechaEnvio;
-	
-	
+
 	private BigDecimal total;
-	
-	
 
 	private List<DetalleOrdenDTO> detalleOrden;
 }

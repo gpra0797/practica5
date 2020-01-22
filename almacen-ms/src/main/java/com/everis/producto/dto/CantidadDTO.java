@@ -12,7 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CantidadDTO {
-
+	
 	private BigDecimal cantidad;
 	
 }

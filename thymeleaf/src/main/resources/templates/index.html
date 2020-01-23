@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>ORDENES</title>
+
+  <!-- Custom fonts for this template-->
+  <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+  <!-- Custom styles for this template-->
+  <link href="css/sb-admin-2.min.css" rel="stylesheet">
+
+	  <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+	  
+	  <link href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css" rel="stylesheet">
+
+</head>
+
+<body id="page-top" class="sidebar-toggled">
+
+  <!-- Page Wrapper -->
+  <div id="wrapper">
+
+    <!-- Sidebar -->
+    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion toggled" id="accordionSidebar">
+
+      <!-- Sidebar - Brand -->
+      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+        <div class="sidebar-brand-icon rotate-n-15">
+          <i class="fas fa-laugh-wink"></i>
+        </div>
+        <div class="sidebar-brand-text mx-3" th:text="${titulo}">SB Admin <sup>2</sup></div>
+      </a>
+
+      <!-- Divider -->
+      <hr class="sidebar-divider my-0">
+
+      <!-- Nav Item - Dashboard -->
+      <li class="nav-item active">
+        <a class="nav-link" href="index.html">
+          <i class="fas fa-fw fa-tachometer-alt"></i>
+          <span>ORDENES</span></a>
+      </li>
+
+      <!-- Divider -->
+      <hr class="sidebar-divider">
+
+      <!-- Heading -->
+  
+   
+
+    
+  
+
+      <!-- Sidebar Toggler (Sidebar) -->
+      <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+      </div>
+
+    </ul>
+    <!-- End of Sidebar -->
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+      <!-- Main Content -->
+      <div id="content">
+
+        <!-- Topbar -->
+        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+          <!-- Sidebar Toggle (Topbar) -->
+          <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+            <i class="fa fa-bars"></i>
+          </button>
+
+          <!-- Topbar Search -->
+          <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+            <div class="input-group">
+              <input type="text" class="form-control bg-light border-0 small" placeholder="buscar..." aria-label="Search" aria-describedby="basic-addon2">
+              <div class="input-group-append">
+                <button class="btn btn-primary" type="button">
+                  <i class="fas fa-search fa-sm"></i>
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <!-- Topbar Navbar -->
+          <ul class="navbar-nav ml-auto">
+
+           
+       
+
+           
+
+        </nav>
+        <!-- End of Topbar -->
+
+        <!-- Begin Page Content -->
+        <div class="container-fluid">
+		
+          <!-- Page Heading -->
+          <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+            <a href="#" id="btnVerProductos" onclick="verProductos();" data-toggle="modal" data-target="#modalProductos" class="mx-5 d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">Lista de Productos</a>
+          </div>
+
+          <!-- Content Row -->
+           <div class="row">
+           		<div class="col-sm-10">
+           			<form >
+		                <div class="form-group row">
+		                  <div class="col-sm-6 mb-3 mb-sm-0">
+		                    <input class="form-control form-control-user" data-label="idCliente" id="idCliente" placeholder="idCliente" type="number" required="required">
+		                  </div>
+		                  <div class="col-sm-6">
+		                    <input type="date" class="form-control form-control-user" id="txtFecha" data-label="fecha" placeholder="Fecha" required="required">
+		                  </div>
+		                </div>
+		                
+		                
+		              
+		              </form>
+           		</div>           		
+            
+           </div>
+           
+           
+           	<div class="row">
+           		<div class="col-sm-12">
+           		<ul class="nav nav-tabs" role="tablist">
+				  <li class="nav-item">
+				    <a class="nav-link active" href="#profile" role="tab" data-toggle="tab" aria-selected="true">Registrar Orden</a>
+				  </li>
+				  <li class="nav-item">
+				    <a class="nav-link" href="#buzz" role="tab" onclick="verOrdenes();" data-toggle="tab">Ordenes Registradas</a>
+				  </li>
+				  
+				</ul>
+				
+				<!-- Tab panes -->
+				<div class="tab-content">
+				  <div role="tabpanel" class="tab-pane fade in active show" id="profile">
+						  
+						  <div class="table-responsive">
+		
+								<table id="tbDetalle" class="display datatable table table-bordered ">
+								    <thead>
+								        <tr>
+				                      <th>Producto</th>
+				                      <th>Descripcion</th>
+				                      <th>Precio</th>
+				                      <th>Cantidad</th>
+				                      <th>Subtotal</th>
+				                       <th>Quitar</th>
+				                    </tr>
+								    </thead>
+								    <tbody id="tBodyDetalleOrden">
+								      
+								    </tbody>
+								</table>
+		
+				      </div>
+				      <button class="btn btn-success" id="btnGuardar" onclick="guardarOrden()">GUARDAR</button>
+				      
+				  </div>
+				  <div role="tabpanel" class="tab-pane fade" id="buzz">
+						  <div class="table-responsive">
+		                <table class="table table-bordered datatable" id="tbOrden" width="100%" cellspacing="0">
+		                  <thead class="bg-warning text-dark">
+		                    <tr>
+		                      <th>#</th>
+		                      <th>Fecha Orden</th>
+		                      <th>Fecha Envio</th>
+		                      <th>IdCliente</th>
+		                      <th>Total</th>
+		                       <th>Detalle</th>
+		                    </tr>
+		                  </thead>
+		                  <tbody id="tBodyOrden">
+		                  	
+		                  </tbody>
+		                  </table>
+		
+				      </div>
+		      </div>
+				 
+				</div>
+           		</div>
+           	</div>
+           	
+           	
+           	
+           	 <div class="row">
+           		<div class="col-sm-7">
+           		
+		      	
+           		</div>
+           		<div class="col-sm-5">
+           		
+           		</div>
+           	</div>
+       
+          <!-- Content Row -->
+
+		      <!-- Modal -->
+		      <div class="modal fade bd-example-modal-lg" tabindex="-1" id="modalProductos" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+			  <div class="modal-dialog modal-lg">
+			    <div class="modal-content">
+			    <div class="table-responsive">
+			                <table class="table table-bordered datatable" id="tbProductos" width="100%" cellspacing="0">
+			                  <thead>
+			                    <tr>
+			                      <th>Producto</th>
+			                      <th>Descripcion</th>
+			                      <th>Precio</th>
+			                      <th>Stock</th>
+			                      <th>Cantidad</th>
+			                      <th>Agregar</th>
+			                    </tr>
+			                  </thead>
+			                  <tbody id="tBodyProductos">
+			                  	
+			                  </tbody>
+			                  
+			                  </table>
+			
+					      </div>
+			    </div>
+			  </div>
+			</div>
+		      
+		
+        <!-- /.container-fluid -->
+
+      </div>
+      <!-- End of Main Content -->
+
+      <!-- Footer -->
+<!--       <footer class="sticky-footer bg-white"> -->
+<!--         <div class="container my-auto"> -->
+<!--           <div class="copyright text-center my-auto"> -->
+<!--             <span></span> -->
+<!--           </div> -->
+<!--         </div> -->
+<!--       </footer> -->
+      <!-- End of Footer -->
+
+    </div>
+    <!-- End of Content Wrapper -->
+
+  </div>
+  <!-- End of Page Wrapper -->
+
+  <!-- Scroll to Top Button-->
+  <a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+  </a>
+
+  <!-- Logout Modal-->
+  <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+          <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+          <a class="btn btn-primary" href="login.html">Logout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap core JavaScript-->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Core plugin JavaScript-->
+  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+  <!-- Custom scripts for all pages-->
+  <script src="js/sb-admin-2.min.js"></script>
+
+
+  <!-- Page level plugins -->
+  <script src="vendor/datatables/jquery.dataTables.min.js"></script>
+  <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+  <!-- Page level custom scripts -->
+  <script src="js/demo/datatables-demo.js"></script>
+
+  <!-- Page level plugins -->
+<!--   <script src="vendor/chart.js/Chart.min.js"></script> -->
+
+  <!-- Page level custom scripts -->
+<!--   <script src="js/demo/chart-area-demo.js"></script> -->
+<!--   <script src="js/demo/chart-pie-demo.js"></script> -->
+  
+  
+  <script type="text/javascript">
+  var listaDetalleOrden=[];
+  verificarDetalle();
+  
+// $('.datatable').DataTable({
+// 	 paging: false,
+	 
+//   });
+  
+  
+  function verProductos(){	  
+		  var myHeaders = new Headers();
+		  var myInit = { method: 'GET',
+		                 headers: myHeaders,
+		                 mode: 'cors',
+		                 cache: 'default' };
+
+		  var myRequest = new Request(`http://10.232.100.92:9090/items/productos`, myInit);
+
+		  		fetch(myRequest)
+		  		  .then(function(response) {
+		  		    return response.json();
+		  		  })
+		  		  .then(function(myJson) {
+		  			pintarTable(myJson);
+		  			 console.log(myJson);
+		  		  })
+		  		  .catch(function(error) {
+		  			  console.log('Hubo un problema con la petición Fetch:' + error.message);
+		  			});		 
+	  
+  }
+  
+  function pintarTable(data){
+	  let html="";
+	
+	 data.forEach(function (producto){
+		 let style="";
+		 if(producto.cantidadStock<=0){
+			   style=`style="color:red;"`;
+		 }
+			
+		 html+=`
+		 <tr ${style}>
+		 <td id="nombre_${producto.id}">${producto.nombre}</td>
+		 <td id="descripcion_${producto.id}">${producto.descripcion}</td>
+		 <td id="precio_${producto.id}">${producto.precio}</td>
+		 <td id="cantidadStock_${producto.id}">${producto.cantidadStock}</td>
+		 <td ><input type="number" class="form-control" id="cantidadOrdenada_${producto.id}"></td>
+		 <td ><button class="btn btn-primary" onclick="agregar(${producto.id})">+</button></td>
+		 </tr>
+		 `;
+	 });
+	 
+	 document.querySelector("#tBodyProductos").innerHTML=html;
+	 $('#tbProductos').DataTable().destroy();
+	 $('#tbProductos').DataTable({
+		 paging: false,
+		
+	  });
+	
+  }
+  
+  
+  function agregar(id){
+	  debugger;
+	  let nombre=document.querySelector("#nombre_"+id).textContent.trim();
+	  let descripcion=document.querySelector("#descripcion_"+id).textContent.trim();
+	  let precio=document.querySelector("#precio_"+id).textContent.trim();
+	  let cantidadStock = document.querySelector("#cantidadStock_"+id).textContent.trim();
+	  let cantidadOrdenada =$("#cantidadOrdenada_"+id).val();
+	  
+	  let objDetalle = {
+			  idProducto : id,
+			  nombre : nombre,
+			  descripcion : descripcion,
+			  precio : precio,
+			  cantidadOrdenada : cantidadOrdenada,			  
+			  cantidad : parseFloat(cantidadOrdenada)
+	  }
+	  if(buscarEnAgregado(id)==null || buscarEnAgregado(id)==undefined){
+		  listaDetalleOrden.push(objDetalle);
+		  listarDetalle(listaDetalleOrden);
+	  }else{
+		  alert("este producto ya fue agregado");
+		//  return;
+	  }
+	 
+	  
+  }
+  
+  function listarDetalle(data){
+	  let html="";
+	  data.forEach(function (detalle){
+		   html+=`
+			  <tr>
+				 <td>${detalle.nombre}</td>
+				 <td >${detalle.descripcion}</td>
+				 <td >${detalle.precio}</td>
+				 <td >${detalle.cantidadOrdenada}</td>
+				 <td >${Number(detalle.cantidadOrdenada*detalle.precio)}</td>
+				 <td ><button class="btn btn-danger" onclick="quitar(${detalle.id})">X</button></td>
+			</tr>`;
+	  });
+	  document.querySelector("#tBodyDetalleOrden").innerHTML=html;  
+	  
+	  verificarDetalle();
+	  $('#tbDetalle').DataTable().destroy();
+	  $('#tbDetalle').DataTable({
+			 paging: false,
+			 destroye:true
+		  });
+  }
+
+  
+  
+  function guardarOrden(){
+		
+	  var OrdenReducidaDTO = {
+	  	"idCliente" : $("#idCliente").val(),
+	  	"fechaEnvio" : $("#txtFecha").val(),
+	  	"detalleOrden" :  listaDetalleOrden
+	  };
+	  
+	  let ListaInputs = [document.querySelector("#idCliente"),document.querySelector("#txtFecha")];
+	
+	  if(validarInputs(ListaInputs)>0){
+		return ;  
+	  }
+	  //console.log(OrdenReducidaDTO);
+	  fetch("http://10.232.100.92:9090/ordenes/Ordens", {
+	    method: 'POST', // or 'PUT'
+	    body: JSON.stringify(OrdenReducidaDTO), 
+	    headers:{
+	      'Content-Type': 'application/json'
+	    }
+	  }).then(res => res.json())
+	  .catch(error => 
+	  alert(error)
+// 	  	console.error('Error:', error);
+	  	)
+	  .then(response => {
+		  if(response.status==400){
+			  alert("validación de negocio");
+			  return;
+		  }
+		  debugger;
+		  console.log(response);
+		  if((response.id * 1) !== 0){
+			  alert("GUARDADO CORRECTAMENTE DESCONTANDO STOCK");
+		  }else{
+			  alert("GUARDADO CORRECTAMENTE SIN DESCONTAR STOCK");
+		  }
+		  limpiarDetalle();		  
+	  }
+		
+	  );		
+  }
+  
+  function limpiarDetalle(){
+	  $("#idCliente").val("");
+	  document.querySelector("#tBodyDetalleOrden").innerHTML="";
+	  listaDetalleOrden=[];
+  }
+  
+  function buscarEnAgregado(id){
+	 let obj = listaDetalleOrden.find(producto => producto.idProducto === (1*id));	 
+	 return obj;
+  }
+  function quitar(id){
+	  let obj = buscarEnAgregado(id);
+	  let indice = listaDetalleOrden.indexOf(obj);
+	  listaDetalleOrden.splice(indice,1);
+	  listarDetalle(listaDetalleOrden);
+  }
+  
+  function verificarDetalle(){
+	  if(listaDetalleOrden.length>0){
+		  $("#btnGuardar").css("display","block");	  
+	  }else{
+		  $("#btnGuardar").css('display','none');	  
+	  }
+		  
+	
+  }
+  
+  function validarInputs(ListaInputs){
+	  let contador=0;
+	  ListaInputs.forEach(function (input){
+		  if(input.value ==""){
+			  alert("EL CAMPO : " + input.getAttribute("data-label") + " NO PUEDE ESTAR VACIO");
+			  contador++;
+		  }
+	  });
+	  return contador;
+  }
+  
+  function verOrdenes(){
+	  var myHeaders = new Headers();
+	  var myInit = { method: 'GET',
+	                 headers: myHeaders,
+	                 mode: 'cors',
+	                 cache: 'default' };
+
+	  var myRequest = new Request(`http://localhost:9090/ordenes/Ordenes`, myInit);
+
+	  		fetch(myRequest)
+	  		  .then(function(response) {
+	  		    return response.json();
+	  		  })
+	  		  .then(function(myJson) {
+	  			listarOrdenes(myJson);
+	  			 console.log(myJson);
+	  		  })
+	  		  .catch(function(error) {
+	  			  console.log('Hubo un problema con la petición Fetch:' + error.message);
+	  			});		 
+	  		
+	  		
+	
+  }
+  function listarOrdenes(data){
+	  let html="";
+		
+		 data.forEach(function (orden){
+		
+			 html+=`
+			 <tr>
+			 <td >${orden.id}</td>
+			 <td >${orden.fecha.substring(0,10)}</td>
+			 <td >${orden.fechaEnvio}</td>
+			 <td >${orden.idCliente}</td>
+			 <td >S./ ${orden.total}</td>
+			 <td ><button class="btn btn-primary" onclick="verDetalleOrden(${orden.id})"><i class="fas fa-eye"></i></button></td>
+			 </tr>
+			 `;
+		 });
+		 
+		 document.querySelector("#tBodyOrden").innerHTML=html;
+		 $('#tbOrden').DataTable().destroy();
+		 $('#tbOrden').DataTable({
+			 paging: false,
+			 destroye:true
+			 
+		  });
+  }
+  </script>
+
+</body>
+
+</html>

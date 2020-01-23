@@ -1,5 +1,10 @@
 package com.everis.escuela.service.impl;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +56,13 @@ public class OrdenServiceImpl implements OrdenService{
 	public boolean existsById(Long id) {
 		// TODO Auto-generated method stub
 		return OrdenRepository.existsById(id);
+	}
+
+	@Override
+	public List<Orden> obtenerOrdenesXfecha(String fechaEnvio) throws ParseException {
+		// TODO Auto-generated method stub
+		 Date date1=new SimpleDateFormat("yyyy-MM-dd").parse(fechaEnvio);  
+		return OrdenRepository.obtenerOrdenesXfecha(date1);
 	}
 
 

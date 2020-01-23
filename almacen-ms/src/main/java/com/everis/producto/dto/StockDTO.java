@@ -10,7 +10,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class StockDTO {		
-
+	private Long id;
+	
 	private Long idTienda;
 	
 	private Long idProducto;

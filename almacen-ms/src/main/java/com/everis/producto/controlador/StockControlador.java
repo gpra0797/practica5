@@ -1,4 +1,4 @@
-package com.everis.producto.controlador;
+	package com.everis.producto.controlador;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -175,5 +175,13 @@ public class StockControlador {
 		for(DetalleOrdenReducidaDTO detalleDTO : actualizarStockDTO.getDetalles()){
 			actualizarStock(detalleDTO.getIdProducto(),detalleDTO.getCantidad().doubleValue());
 		}
+	}
+	
+	
+	@PostMapping(value = "/agregar/stock")
+	public StockDTO agregarStock(@RequestBody StockDTO stock){
+		ModelMapper mapper = new ModelMapper();
+		Stock stockGuardado = StockService.guardarStock(mapper.map(stock, Stock.class));
+		return mapper.map(stockGuardado, StockDTO.class);
 	}
 }

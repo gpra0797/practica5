@@ -1,6 +1,8 @@
 package com.everis.producto.controlador;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -29,6 +31,8 @@ import com.everis.producto.exceptions.ValidationException;
 import com.everis.producto.repository.feign.StockClient;
 import com.everis.producto.service.impl.FeignClientServiceImpl;
 import com.everis.producto.service.impl.ProductoServiceImpl;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 
 @RestController
 @RefreshScope
@@ -48,13 +52,28 @@ public class ProductoControlador {
 	@Autowired
 	private FeignClientServiceImpl stockClient;
 	
+	@HystrixCommand(
+			 commandProperties = {
+						@HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "5000")}
+			 )
 	@GetMapping(value = "/productos")
-	public List<ProductoDTO> obtenerProductos() {
+	public List<ProductoDTO> obtenerProductos() throws ValidationException, ResourceNotFoundException {
 		ModelMapper mapper = new ModelMapper();
 		Iterable<Producto> productos = productoService.obtenerProductos();
-		return StreamSupport.stream(productos.spliterator(), false)
-					.map(p -> mapper.map(p, ProductoDTO.class))
-					.collect(Collectors.toList());
+		List<ProductoDTO> lstDto=  new ArrayList<>();
+		for(Producto prod : productos) {
+			
+			ProductoDTO dto = mapper.map(prod, ProductoDTO.class);
+			dto.setCantidadStock(stockClient.obtenerCantidadStockProducto(prod.getId()).getCantidad());
+			lstDto.add(dto);
+			
+		}
+		
+		
+//		return StreamSupport.stream(productos.spliterator(), false)
+//					.map(p -> mapper.map(p, ProductoDTO.class))
+//					.collect(Collectors.toList());
+		return  lstDto;
 	}
 	
 	@GetMapping(value = "/productos/{id}")

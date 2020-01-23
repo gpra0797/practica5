@@ -43,6 +43,7 @@ public class Orden {
 	private Date fecha;
 	
 	@Column(name = "fecha_envio")
+	@Temporal(TemporalType.DATE)
 	private Date fechaEnvio;
 	
 	@Column(name = "total")

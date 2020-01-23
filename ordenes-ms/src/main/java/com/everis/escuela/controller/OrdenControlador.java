@@ -2,7 +2,9 @@ package com.everis.escuela.controller;
 
 import java.math.BigDecimal;
 import java.net.URI;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -129,6 +131,15 @@ public class OrdenControlador {
 		return OrdenService.obtenerOrdenXId(id);
 
 	}
+	
+	
+	@GetMapping("/orden/listado/{fechaEnvio}")
+	public List<OrdenDTO> obtenerOrdenesXFecha(@PathVariable("fechaEnvio") String fechaEnvio) throws ParseException{
+		ModelMapper modelMapper = new ModelMapper();
+		return StreamSupport.stream(OrdenService.obtenerOrdenesXfecha((fechaEnvio)).spliterator(), false)
+				.map(c -> modelMapper.map(c, OrdenDTO.class)).collect(Collectors.toList());
+	}
+	
 
 	public CantidadDTO getCantidad(String service, Long id) {
 		List<ServiceInstance> list = client.getInstances(service);
@@ -178,8 +189,11 @@ public class OrdenControlador {
 		or.setIdCliente(orden.getIdCliente());
 		or.setTotal(new BigDecimal(totalOrden));
 		Orden ordenGuardada = OrdenService.guardarOrden(or);
-
+		ordenGuardada.setId(0L);
 		return modelMapper.map(ordenGuardada, OrdenDTO.class);
 	}
+	
+	
+	
 
 }

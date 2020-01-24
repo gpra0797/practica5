@@ -2,6 +2,7 @@ package com.everis.escuela.entidad;
 
 import java.math.BigDecimal;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -30,7 +31,7 @@ public class DetalleOrden {
 	@Column(name = "id_producto")
 	private Long idProducto;
 
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "orden_id")
 	private Orden orden;
 	

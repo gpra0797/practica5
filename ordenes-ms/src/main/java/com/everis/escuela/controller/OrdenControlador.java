@@ -207,7 +207,7 @@ public class OrdenControlador {
 	public OrdenDTO deleteOrden(@PathVariable("idOrden") Long idOrden) throws ResourceNotFoundException, ValidationException {
 		ModelMapper modelMapper = new ModelMapper();
 		Orden orden = OrdenService.obtenerOrdenXId(idOrden);
-		
+		OrdenService.deleteOrdenXId(idOrden);
 		ActualizarStockDTO actualizarStockDTO = new ActualizarStockDTO();
 		actualizarStockDTO.setDetalles(new ArrayList<DetalleOrdenReducidaDTO>());
 	
@@ -222,7 +222,7 @@ public class OrdenControlador {
 
 		stockClientI.actualizarStockskLista(actualizarStockDTO);
 		
-		return modelMapper.map(OrdenService.deleteOrden(idOrden), OrdenDTO.class);
+		return modelMapper.map(orden, OrdenDTO.class);
 	}
 	
 	@PutMapping("/orden/{idOrden}")

@@ -47,7 +47,9 @@ public class OrdenServiceImpl implements OrdenService{
 		
 	}
 
+	
 	@Override
+	@Transactional(readOnly = false)
 	public void deleteOrdenXId(Long id) {		
 		 OrdenRepository.deleteById(id);
 	}
@@ -72,11 +74,10 @@ public class OrdenServiceImpl implements OrdenService{
 	}
 
 	@Override
-	public Orden deleteOrden(Long id) {
-		// TODO Auto-generated method stub
-		Orden orden = OrdenRepository.findById(id).get();
-		OrdenRepository.delete(orden);
-		return orden;
+	public void deleteOrden(Long id) {
+		// TODO Auto-generated method stub	
+		
+		 OrdenRepository.deleteById(id);;
 	}
 
 	@Override

@@ -26,7 +26,7 @@ public interface OrdenService {
 	
 	public List<Orden> obtenerOrdenesXProducto(Long idProducto);
 
-	public Orden deleteOrden(Long id);
+	public void deleteOrden(Long id);
 	
 	public Orden actualizarOrden(Orden orden);
 	

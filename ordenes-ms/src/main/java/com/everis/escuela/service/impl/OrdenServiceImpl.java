@@ -65,6 +65,28 @@ public class OrdenServiceImpl implements OrdenService{
 		return OrdenRepository.obtenerOrdenesXfecha(date1);
 	}
 
+	@Override
+	public List<Orden> obtenerOrdenesXProducto(Long idProducto) {
+		// TODO Auto-generated method stub
+		return OrdenRepository.obtenerOrdenesXProducto(idProducto);
+	}
+
+	@Override
+	public Orden deleteOrden(Long id) {
+		// TODO Auto-generated method stub
+		Orden orden = OrdenRepository.findById(id).get();
+		OrdenRepository.delete(orden);
+		return orden;
+	}
+
+	@Override
+	public Orden actualizarOrden(Orden orden) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	
+	
 
 
 

@@ -3,6 +3,7 @@ package com.everis.escuela.controller;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -17,8 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -140,6 +143,13 @@ public class OrdenControlador {
 				.map(c -> modelMapper.map(c, OrdenDTO.class)).collect(Collectors.toList());
 	}
 	
+	@GetMapping("/orden/detalle/{idProducto}")
+	public List<OrdenDTO> obtenerOrdenesXProducto(@PathVariable("idProducto") Long idProducto) throws ParseException{
+		ModelMapper modelMapper = new ModelMapper();
+		return StreamSupport.stream(OrdenService.obtenerOrdenesXProducto((idProducto)).spliterator(), false)
+				.map(c -> modelMapper.map(c, OrdenDTO.class)).collect(Collectors.toList());
+	}
+	
 
 	public CantidadDTO getCantidad(String service, Long id) {
 		List<ServiceInstance> list = client.getInstances(service);
@@ -193,7 +203,36 @@ public class OrdenControlador {
 		return modelMapper.map(ordenGuardada, OrdenDTO.class);
 	}
 	
+	@DeleteMapping("/orden/{idOrden}")
+	public OrdenDTO deleteOrden(@PathVariable("idOrden") Long idOrden) throws ResourceNotFoundException, ValidationException {
+		ModelMapper modelMapper = new ModelMapper();
+		Orden orden = OrdenService.obtenerOrdenXId(idOrden);
+		
+		ActualizarStockDTO actualizarStockDTO = new ActualizarStockDTO();
+		actualizarStockDTO.setDetalles(new ArrayList<DetalleOrdenReducidaDTO>());
 	
+		
+		for (DetalleOrden detalle : orden.getDetalleOrden()) {
+
+			DetalleOrdenReducidaDTO detalleOrdenReducidaDTO = new DetalleOrdenReducidaDTO(detalle.getIdProducto(),
+					detalle.getCantidad().negate());
+	
+			actualizarStockDTO.getDetalles().add(detalleOrdenReducidaDTO);
+		}
+
+		stockClientI.actualizarStockskLista(actualizarStockDTO);
+		
+		return modelMapper.map(OrdenService.deleteOrden(idOrden), OrdenDTO.class);
+	}
+	
+	@PutMapping("/orden/{idOrden}")
+	public OrdenDTO actualizarFecha(@PathVariable("idOrden") Long idOrden, @RequestBody String fecha) throws ResourceNotFoundException, ParseException {
+		Orden orden = OrdenService.obtenerOrdenXId(idOrden);
+		Date fechaActualizada=new SimpleDateFormat("yyyy-MM-dd").parse(fecha);  
+		orden.setFechaEnvio(fechaActualizada);		
+		ModelMapper modelMapper = new ModelMapper();
+		return modelMapper.map(OrdenService.guardarOrden(orden), OrdenDTO.class);
+	}
 	
 
 }

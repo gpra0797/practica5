@@ -23,5 +23,11 @@ public interface OrdenService {
 	public List<Orden> obtenerOrdenesXfecha(String fecha) throws ParseException;
 
 	//List<Orden> obtenerOrdenesXfecha(Date fechaEnvio);
+	
+	public List<Orden> obtenerOrdenesXProducto(Long idProducto);
 
+	public Orden deleteOrden(Long id);
+	
+	public Orden actualizarOrden(Orden orden);
+	
 }

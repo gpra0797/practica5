@@ -1,6 +1,6 @@
 spring:
   application:
-    name: ordenes-ms  cloud:    config:      uri: http://localhost:8081      
+    name: ordenes-ms  cloud:    config:      uri: http://user:34a35bf5-f94a-4291-be2e-06c519bd4ba6@localhost:8081      
 server:      port: ${PORT:${SERVER_PORT:0}} #obtener puertos aleatorios
       
 eureka:

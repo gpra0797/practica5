@@ -16,4 +16,9 @@ public interface OrdenRepository extends CrudRepository<Orden,Long> {
 
 	@Query("select  orden from Orden orden where orden.fechaEnvio >= ?1")
 	public List<Orden> obtenerOrdenesXfecha(Date fechaEnvio);
+	
+	
+	@Query("select  orden,detalle from Orden orden inner join orden.detalleOrden detalle where detalle.idProducto = ?1")
+	public List<Orden> obtenerOrdenesXProducto(Long idProducto);
 }
+
